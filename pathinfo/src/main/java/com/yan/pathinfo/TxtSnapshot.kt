@@ -12,7 +12,7 @@ import java.util.*
  * TextView 字符串快照
  */
 class TxtSnapshot {
-    companion object{
+    companion object {
         private const val MAX_TXT = 15
         private const val MAX_TXT_LENGTH = 30
         private const val SPLIT = " | "
@@ -36,9 +36,9 @@ class TxtSnapshot {
                     viewCache.add(v.getChildAt(i))
                 }
             } else if (v is TextView) {
-                txtBuilder
-                    .append(SPLIT)
-                    .append(v.text.subSequence(0, MAX_TXT_LENGTH.coerceAtMost(v.text.length)))
+                val txt = v.text
+                txtBuilder.append(SPLIT)
+                    .append(txt.subSequence(0, MAX_TXT_LENGTH.coerceAtMost(txt.length)))
             }
         }
         return txtBuilder.toString()

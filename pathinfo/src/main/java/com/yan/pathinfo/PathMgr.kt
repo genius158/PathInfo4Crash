@@ -11,6 +11,7 @@ import java.io.*
  * @since  2021/3/15
  */
 object PathMgr {
+    private const val FILE_NAME = ".PathRecorder.pi"
     private const val BUNDLE_PATH_FROM_DISK = "loadFromDiskCache"
 
     // 地址记录
@@ -25,7 +26,7 @@ object PathMgr {
 
     @JvmStatic
     fun initDetector(app: Application) {
-        cacheFilePath = app.cacheDir.absolutePath + File.separator + ".PathRecorder.pi"
+        cacheFilePath = app.cacheDir.absolutePath + File.separator + FILE_NAME
         app.registerActivityLifecycleCallbacks(activityDetector)
     }
 
@@ -68,8 +69,8 @@ object PathMgr {
         }
 
     private fun restore(savedInstanceState: Bundle): PathRecorder? {
-        val loadFromDiskCache = savedInstanceState.getBoolean(BUNDLE_PATH_FROM_DISK)
-        if (!loadFromDiskCache) return null
+        val needLoadFromDisk = savedInstanceState.getBoolean(BUNDLE_PATH_FROM_DISK)
+        if (!needLoadFromDisk) return null
 
         val cf = cacheFile ?: return null
         val objInput = ObjectInputStream(FileInputStream(cf))
@@ -96,6 +97,12 @@ object PathMgr {
             it.looper
         })
 
+    /**
+     * 专门用来写入文件的PathRecorder
+     * 子线程操作
+     * 处理ArrayList 写入是可能抛ConcurrentModificationException
+     */
+    private val writeRecorder = PathRecorder()
     private fun save2Disk() {
         val pr = pathRecorder ?: return
         val cf = cacheFile ?: return
@@ -104,7 +111,9 @@ object PathMgr {
             val objInput = ObjectOutputStream(FileOutputStream(cf))
             objInput.use {
                 try {
-                    it.writeObject(pr)
+                    writeRecorder.pathInfoList.clear()
+                    writeRecorder.pathInfoList.addAll(pr.pathInfoList)
+                    it.writeObject(writeRecorder)
                 } catch (e: Throwable) {
                     e.printStackTrace()
                 }

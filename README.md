@@ -1,6 +1,7 @@
 # PageInfo
 发生crash或anr后，追加页面跳转路径和TextView界面快照，方便现下复现
 
+![事例](snapshot/demo.png)
 ```
  // 路径日志 右箭头 跳转到新界面
  // 左箭头 返回

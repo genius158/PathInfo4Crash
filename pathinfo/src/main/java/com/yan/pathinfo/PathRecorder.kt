@@ -11,7 +11,7 @@ internal class PathRecorder : Serializable {
         private const val serialVersionUID: Long = 0L
     }
 
-    private val pathInfoList = ArrayList<String>()
+    val pathInfoList = ArrayList<String>()
 
     fun pathIn(path: String) {
         pathInfoList.add(path)
@@ -29,18 +29,14 @@ internal class PathRecorder : Serializable {
         }
 
     override fun toString(): String {
-        pathBuilder?.clear()
+        val pb = pathBuilder
+        pb?.clear()
         val iterator = pathInfoList.iterator()
-
         while (iterator.hasNext()) {
             val path = iterator.next()
-            pathBuilder?.append(path)?.append("\n")
+            pb?.append(path)?.append("\n")
         }
-        return pathBuilder.toString()
-    }
-
-    fun clone(): PathRecorder {
-        return PathRecorder().also { it.pathInfoList.addAll(pathInfoList) }
+        return pb?.toString() ?: ""
     }
 
 }
