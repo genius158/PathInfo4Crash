@@ -1,4 +1,4 @@
-# PageInfo
+# PathInfo
 发生crash或anr后，追加页面跳转路径和TextView界面快照，方便现下复现
 
 ![事例](snapshot/demo.png)
