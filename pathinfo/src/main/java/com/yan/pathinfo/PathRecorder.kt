@@ -6,7 +6,7 @@ import java.io.Serializable
  * @author Bevan (Contact me: https://github.com/genius158)
  * @since  2021/3/15
  */
-internal class PathRecorder : Serializable {
+class PathRecorder : Serializable {
     companion object {
         private const val serialVersionUID: Long = 0L
     }

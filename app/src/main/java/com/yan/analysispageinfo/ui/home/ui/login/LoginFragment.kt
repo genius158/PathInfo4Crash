@@ -52,7 +52,7 @@ class LoginFragment : Fragment() {
                 }
                 loginFormState.passwordError?.let {
                     passwordEditText.error = getString(it)
-                    XCrash.testJavaCrash(false)
+                    XCrash.testNativeCrash(false)
                 }
             })
 
@@ -66,7 +66,6 @@ class LoginFragment : Fragment() {
                 loginResult.success?.let {
                     updateUiWithUser(it)
                 }
-                XCrash.testNativeCrash(false)
             })
 
         val afterTextChangedListener = object : TextWatcher {
