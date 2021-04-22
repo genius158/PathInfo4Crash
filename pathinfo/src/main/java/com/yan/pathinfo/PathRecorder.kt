@@ -21,22 +21,18 @@ class PathRecorder : Serializable {
         pathInfoList.add(path)
     }
 
-    @Transient
-    private var pathBuilder: StringBuilder? = null
-        get() {
-            if (field == null) field = StringBuilder()
-            return field
-        }
+    private var pathBuilder = StringBuilder()
 
     override fun toString(): String {
         val pb = pathBuilder
-        pb?.clear()
+//        pb.clear()
+        pb.delete(0,pb.length)
         val iterator = pathInfoList.iterator()
         while (iterator.hasNext()) {
             val path = iterator.next()
-            pb?.append(path)?.append("\n")
+            pb.append(path).append("\n")
         }
-        return pb?.toString() ?: ""
+        return pb.toString()
     }
 
 }
