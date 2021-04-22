@@ -1,6 +1,7 @@
 package com.yan.analysispageinfo
 
 import android.os.Bundle
+import android.os.Trace
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -11,6 +12,7 @@ import androidx.navigation.ui.setupWithNavController
 class MainActivity2 : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Trace.beginSection("onCreate")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main2)
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
@@ -25,5 +27,6 @@ class MainActivity2 : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+        Trace.endSection()
     }
 }

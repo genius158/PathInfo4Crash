@@ -2,13 +2,18 @@ package com.yan.pathinfo
 
 import android.os.Handler
 import android.os.HandlerThread
-import java.io.*
+import com.yan.pathinfo.PathInfo.TIP_RECOVER_FROM_SAVED_INSTANCE
+import java.io.BufferedWriter
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 
 /**
  * @author Bevan (Contact me: https://github.com/genius158)
  * @since  2021/3/16
  */
 class RecorderCache(private var cacheFilePath: String) {
+    private val charset = Charsets.US_ASCII
 
     private var cacheFile: File? = null
         get() {
@@ -16,47 +21,60 @@ class RecorderCache(private var cacheFilePath: String) {
             return field
         }
 
-    fun getRecorder(): PathRecorder? {
-        val cf = cacheFile ?: return null
-        val objInput = ObjectInputStream(FileInputStream(cf))
-        return objInput.use {
-            try {
-                (it.readObject() as? PathRecorder)?.also { pr ->
-                    pr.pathIn(PathInfo.TIP_RECOVER_FROM_SAVED_INSTANCE)
-                }
-            } catch (e: Throwable) {
-                e.printStackTrace()
-                null
-            }
-        }
-    }
-
     private val savingHandler = Handler(
         HandlerThread("PathRecorder").let {
             it.start()
             it.looper
         })
 
-    /**
-     * 专门用来写入文件的PathRecorder
-     * 子线程操作
-     * 处理ArrayList 写入是可能抛ConcurrentModificationException
-     */
-    private val writeRecorder = PathRecorder()
-    fun cache2Disk(pathRecorder: PathRecorder?) {
-        val pr = pathRecorder ?: return
+    fun getCacheRecorder(): PathRecorder? {
+        val cf = cacheFile ?: return null
+
+        val pr = PathRecorder()
+        val cacheReader = cf.reader(charset)
+        val dataLines = try {
+            cacheReader.useLines { it.toList() }
+        } catch (ignore: Throwable) {
+            arrayListOf<String>()
+        }
+
+        pr.pathInfoList.addAll(dataLines)
+
+        // 崩溃恢复、内存不足被系统回收恢复
+        pr.pathInfoList.add(TIP_RECOVER_FROM_SAVED_INSTANCE)
+
+        cache2Disk(TIP_RECOVER_FROM_SAVED_INSTANCE)
+        return pr
+    }
+
+    private var cacheWriter: BufferedWriter? = null
+
+    fun cache2Disk(data: String?) {
+        data ?: return
         val cf = cacheFile ?: return
-        savingHandler.removeCallbacksAndMessages(null)
         savingHandler.post {
-            val objInput = ObjectOutputStream(FileOutputStream(cf))
-            objInput.use {
-                try {
-                    writeRecorder.pathInfoList.clear()
-                    writeRecorder.pathInfoList.addAll(pr.pathInfoList)
-                    it.writeObject(writeRecorder)
-                } catch (e: Throwable) {
-                    e.printStackTrace()
+            try {
+                if (cacheWriter == null) {
+                    cacheWriter = FileOutputStream(cf, true).bufferedWriter(charset)
                 }
+                cacheWriter
+                    ?.append(data)
+                    ?.append("\n")
+                    ?.flush()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun clear() {
+        val cf = cacheFile ?: return
+
+        savingHandler.post {
+            try {
+                cf.writeText("", charset)
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         }
     }

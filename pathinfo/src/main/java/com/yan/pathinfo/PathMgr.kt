@@ -39,12 +39,12 @@ object PathMgr {
 
     internal fun pathIn(path: String) {
         pathRecorder?.pathIn(path)
-        recorderCache?.cache2Disk(pathRecorder)
+        recorderCache?.cache2Disk(path)
     }
 
     internal fun pathOut(path: String) {
         pathRecorder?.pathOut(path)
-        recorderCache?.cache2Disk(pathRecorder)
+        recorderCache?.cache2Disk(path)
     }
 
     internal fun tryLoadOrRestorePath(savedInstanceState: Bundle?) {
@@ -52,6 +52,9 @@ object PathMgr {
 
         if (savedInstanceState != null) {
             pathRecorder = restore(savedInstanceState)
+        } else {
+            // 重新启动，清空之前的缓存
+            recorderCache?.clear()
         }
 
         if (pathRecorder == null) {
@@ -63,7 +66,7 @@ object PathMgr {
         val needLoadFromDisk = savedInstanceState.getBoolean(BUNDLE_PATH_FROM_DISK)
         if (!needLoadFromDisk) return null
 
-        return recorderCache?.getRecorder()
+        return recorderCache?.getCacheRecorder()
     }
 
 

@@ -1,1 +1,1 @@
-include ':pathinfo'include ':app'rootProject.name = "AnalysisPageInfo"
+include ':test'include ':pathinfo'include ':app'rootProject.name = "AnalysisPageInfo"

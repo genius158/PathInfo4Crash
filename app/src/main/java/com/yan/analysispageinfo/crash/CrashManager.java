@@ -11,6 +11,8 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 import xcrash.ICrashCallback;
 import xcrash.TombstoneManager;
@@ -58,6 +60,18 @@ public class CrashManager {
                 else {
                     actManager.finish();
                 }
+
+                try {
+                    Class monitor = Class.forName("xcrash.ActivityMonitor");
+                    Method getIns = monitor.getDeclaredMethod("getInstance");
+                    getIns.setAccessible(true);
+                    Object ins = getIns.invoke(null);
+                    Field activities = monitor.getDeclaredField("activities");
+                    activities.setAccessible(true);
+                    activities.set(ins,null);
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
             }
         };
 
@@ -71,14 +85,12 @@ public class CrashManager {
         // Initialize xCrash.
         XCrash.init(application,
                 new XCrash.InitParameters().setAppVersion(String.valueOf(version))
-                        .setJavaRethrow(true)
                         .setJavaLogCountMax(10)
                         .setJavaDumpAllThreadsWhiteList(
                                 new String[]{"^main$", "^Binder:.*", ".*Finalizer.*"})
                         .setJavaDumpAllThreadsCountMax(10)
                         .setJavaCallback(callback)
                         .setAnrCallback(callback)
-                        .setNativeRethrow(false)
                         .setNativeLogCountMax(10)
                         .setNativeDumpAllThreadsWhiteList(new String[]{
                                 "^xcrash\\.sample$", "^Signal Catcher$", "^Jit thread pool$", ".*(R|r)ender.*",
@@ -87,6 +99,8 @@ public class CrashManager {
                         .setNativeDumpAllThreadsCountMax(10)
                         .setNativeCallback(callback)
                         .setPlaceholderCountMax(3)
+                        .setJavaRethrow(false)
+                        .setNativeRethrow(false)
                         .setPlaceholderSizeKb(512)
                         .setLogFileMaintainDelayMs(1000));
     }
@@ -101,8 +115,8 @@ public class CrashManager {
         Log.d(TAG, "debug debug debug   " + logPath + "    " + emergency);
         FileWriter writer = null;
         try {
-//            File debug = new File(application.getFilesDir() + "/tombstonesss/" + System.currentTimeMillis() + "debug.json");
-            File debug = new File(application.getExternalFilesDir("tombstonesss") + "/" + System.currentTimeMillis() + "debug.json");
+            File debug = new File(application.getFilesDir() + "/tombstonesss/" + System.currentTimeMillis() + "debug.json");
+//            File debug = new File(application.getExternalFilesDir("tombstonesss") + "/" + System.currentTimeMillis() + "debug.json");
             if (!debug.getParentFile().exists()) debug.getParentFile().mkdirs();
             debug.createNewFile();
             writer = new FileWriter(debug, false);
@@ -112,6 +126,7 @@ public class CrashManager {
             // 增加 txtView 快照
             info.put("txtSnapshot", PathMgr.getTxtSnapshot());
             writer.write(info.toString());
+            writer.flush();
         } catch (Exception e) {
             Log.d(TAG, "debug failed", e);
         } finally {

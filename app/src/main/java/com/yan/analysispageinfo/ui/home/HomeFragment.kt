@@ -8,6 +8,12 @@ import android.widget.Button
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.chad.library.adapter.base.BaseQuickAdapter
+import com.chad.library.adapter.base.loadmore.SimpleLoadMoreView
+import com.chad.library.adapter.base.module.LoadMoreModule
+import com.chad.library.adapter.base.viewholder.BaseViewHolder
 import com.yan.analysispageinfo.R
 import com.yan.analysispageinfo.ui.home.ui.login.LoginFragment
 
@@ -36,6 +42,25 @@ class HomeFragment : Fragment() {
         view.findViewById<View>(R.id.text_home).setOnClickListener {
             childFragmentManager.beginTransaction().add(R.id.container, LoginFragment())
                 .commitAllowingStateLoss()
+        }
+
+        val rvdata = view.findViewById<RecyclerView>(R.id.rvData)
+        rvdata.layoutManager = LinearLayoutManager(view.context)
+        rvdata.adapter = Adapter().apply {
+            loadMoreModule.isEnableLoadMore = true
+            loadMoreModule.isAutoLoadMore = true
+            loadMoreModule.isEnableLoadMoreIfNotFullPage = true
+            loadMoreModule.setOnLoadMoreListener {
+                
+            }
+
+        }
+    }
+
+    inner class Adapter : BaseQuickAdapter<Int, BaseViewHolder>(R.layout.test,
+        arrayListOf(1,23,34,5,5)),
+        LoadMoreModule {
+        override fun convert(holder: BaseViewHolder, item: Int) {
         }
     }
 }
